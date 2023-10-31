@@ -33,7 +33,6 @@ make_const(expr_ty node, PyObject *val, PyArena *arena)
         return 0;
     }
     node->kind = Constant_kind;
-    node->v.Constant.kind = NULL;
     node->v.Constant.value = val;
     return 1;
 }
@@ -286,7 +285,7 @@ parse_literal(PyObject *fmt, Py_ssize_t *ppos, PyArena *arena)
         Py_DECREF(str);
         return NULL;
     }
-    return _PyAST_Constant(str, NULL, -1, -1, -1, -1, arena);
+    return _PyAST_Constant(str, -1, -1, -1, -1, arena);
 }
 
 #define MAXDIGITS 3
@@ -380,7 +379,7 @@ parse_format(PyObject *fmt, Py_ssize_t *ppos, expr_ty arg, PyArena *arena)
                 Py_DECREF(str);
                 return NULL;
             }
-            format_spec = _PyAST_Constant(str, NULL, -1, -1, -1, -1, arena);
+            format_spec = _PyAST_Constant(str, -1, -1, -1, -1, arena);
             if (format_spec == NULL) {
                 return NULL;
             }

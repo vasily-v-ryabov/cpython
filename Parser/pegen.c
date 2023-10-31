@@ -683,7 +683,7 @@ _PyPegen_number_token(Parser *p)
         return NULL;
     }
 
-    return _PyAST_Constant(c, NULL, t->lineno, t->col_offset, t->end_lineno,
+    return _PyAST_Constant(c, t->lineno, t->col_offset, t->end_lineno,
                            t->end_col_offset, p->arena);
 }
 

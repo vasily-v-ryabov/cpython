@@ -558,7 +558,7 @@ class AST_Tests(unittest.TestCase):
         with warnings.catch_warnings(record=True) as wlog:
             warnings.filterwarnings('always', '', DeprecationWarning)
             x = ast.Num()
-            self.assertEqual(x._fields, ('value', 'kind'))
+            self.assertEqual(x._fields, ('value',))
 
             with self.assertRaises(AttributeError):
                 x.value
@@ -581,7 +581,7 @@ class AST_Tests(unittest.TestCase):
 
             x = ast.Num(42, lineno=0)
             self.assertEqual(x.lineno, 0)
-            self.assertEqual(x._fields, ('value', 'kind'))
+            self.assertEqual(x._fields, ('value',))
             self.assertEqual(x.value, 42)
             self.assertEqual(x.n, 42)
 
@@ -631,7 +631,7 @@ class AST_Tests(unittest.TestCase):
 
     def test_classattrs(self):
         x = ast.Constant()
-        self.assertEqual(x._fields, ('value', 'kind'))
+        self.assertEqual(x._fields, ('value',))
 
         with self.assertRaises(AttributeError):
             x.value
@@ -650,7 +650,7 @@ class AST_Tests(unittest.TestCase):
 
         x = ast.Constant(42, lineno=0)
         self.assertEqual(x.lineno, 0)
-        self.assertEqual(x._fields, ('value', 'kind'))
+        self.assertEqual(x._fields, ('value',))
         self.assertEqual(x.value, 42)
 
         self.assertRaises(TypeError, ast.Constant, 1, None, 2)
@@ -2310,23 +2310,6 @@ class ConstantTests(unittest.TestCase):
         binop.right = new_right
 
         self.assertEqual(ast.literal_eval(binop), 10+20j)
-
-    def test_string_kind(self):
-        c = ast.parse('"x"', mode='eval').body
-        self.assertEqual(c.value, "x")
-        self.assertEqual(c.kind, None)
-
-        c = ast.parse('u"x"', mode='eval').body
-        self.assertEqual(c.value, "x")
-        self.assertEqual(c.kind, "u")
-
-        c = ast.parse('r"x"', mode='eval').body
-        self.assertEqual(c.value, "x")
-        self.assertEqual(c.kind, None)
-
-        c = ast.parse('b"x"', mode='eval').body
-        self.assertEqual(c.value, b"x")
-        self.assertEqual(c.kind, None)
 
 
 class EndPositionTests(unittest.TestCase):

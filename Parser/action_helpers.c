@@ -1281,7 +1281,7 @@ _PyPegen_decode_fstring_part(Parser* p, int is_raw, expr_ty constant, Token* tok
         Py_DECREF(str);
         return NULL;
     }
-    return _PyAST_Constant(str, NULL, constant->lineno, constant->col_offset,
+    return _PyAST_Constant(str, constant->lineno, constant->col_offset,
                            constant->end_lineno, constant->end_col_offset,
                            p->arena);
 }
@@ -1395,7 +1395,7 @@ expr_ty _PyPegen_decoded_constant_from_token(Parser* p, Token* tok) {
         Py_DECREF(str);
         return NULL;
     }
-    return _PyAST_Constant(str, NULL, tok->lineno, tok->col_offset,
+    return _PyAST_Constant(str, tok->lineno, tok->col_offset,
                            tok->end_lineno, tok->end_col_offset,
                            p->arena);
 }
@@ -1413,7 +1413,7 @@ expr_ty _PyPegen_constant_from_token(Parser* p, Token* tok) {
         Py_DECREF(str);
         return NULL;
     }
-    return _PyAST_Constant(str, NULL, tok->lineno, tok->col_offset,
+    return _PyAST_Constant(str, tok->lineno, tok->col_offset,
                            tok->end_lineno, tok->end_col_offset,
                            p->arena);
 }
@@ -1432,14 +1432,7 @@ expr_ty _PyPegen_constant_from_string(Parser* p, Token* tok) {
         Py_DECREF(s);
         return NULL;
     }
-    PyObject *kind = NULL;
-    if (the_str && the_str[0] == 'u') {
-        kind = _PyPegen_new_identifier(p, "u");
-        if (kind == NULL) {
-            return NULL;
-        }
-    }
-    return _PyAST_Constant(s, kind, tok->lineno, tok->col_offset, tok->end_lineno, tok->end_col_offset, p->arena);
+    return _PyAST_Constant(s, tok->lineno, tok->col_offset, tok->end_lineno, tok->end_col_offset, p->arena);
 }
 
 expr_ty _PyPegen_formatted_value(Parser *p, expr_ty expression, Token *debug, ResultTokenWithMetadata *conversion,
@@ -1493,7 +1486,7 @@ expr_ty _PyPegen_formatted_value(Parser *p, expr_ty expression, Token *debug, Re
             debug_metadata = closing_brace->metadata;
         }
 
-        expr_ty debug_text = _PyAST_Constant(debug_metadata, NULL, lineno, col_offset + 1, debug_end_line,
+        expr_ty debug_text = _PyAST_Constant(debug_metadata, lineno, col_offset + 1, debug_end_line,
                                              debug_end_offset - 1, p->arena);
         if (!debug_text) {
             return NULL;
@@ -1546,11 +1539,6 @@ _PyPegen_concatenate_strings(Parser *p, asdl_expr_seq *strings,
     if (bytes_found) {
         PyObject* res = PyBytes_FromString("");
 
-        /* Bytes literals never get a kind, but just for consistency
-           since they are represented as Constant nodes, we'll mirror
-           the same behavior as unicode strings for determining the
-           kind. */
-        PyObject* kind = asdl_seq_GET(strings, 0)->v.Constant.kind;
         for (i = 0; i < len; i++) {
             expr_ty elem = asdl_seq_GET(strings, i);
             PyBytes_Concat(&res, elem->v.Constant.value);
@@ -1559,7 +1547,7 @@ _PyPegen_concatenate_strings(Parser *p, asdl_expr_seq *strings,
             Py_XDECREF(res);
             return NULL;
         }
-        return _PyAST_Constant(res, kind, lineno, col_offset, end_lineno, end_col_offset, p->arena);
+        return _PyAST_Constant(res, lineno, col_offset, end_lineno, end_col_offset, p->arena);
     }
 
     if (!f_string_found && len == 1) {
@@ -1627,14 +1615,6 @@ _PyPegen_concatenate_strings(Parser *p, asdl_expr_seq *strings,
                 asdl_seq_GET(flattened, i + 1)->kind == Constant_kind) {
                 expr_ty first_elem = elem;
 
-                /* When a string is getting concatenated, the kind of the string
-                   is determined by the first string in the concatenation
-                   sequence.
-
-                   u"abc" "def" -> u"abcdef"
-                   "abc" u"abc" ->  "abcabc" */
-                PyObject *kind = elem->v.Constant.kind;
-
                 _PyUnicodeWriter_Init(&writer);
                 expr_ty last_elem = elem;
                 for (j = i; j < n_flattened_elements; j++) {
@@ -1661,7 +1641,7 @@ _PyPegen_concatenate_strings(Parser *p, asdl_expr_seq *strings,
                     Py_DECREF(concat_str);
                     return NULL;
                 }
-                elem = _PyAST_Constant(concat_str, kind, first_elem->lineno,
+                elem = _PyAST_Constant(concat_str, first_elem->lineno,
                                        first_elem->col_offset,
                                        last_elem->end_lineno,
                                        last_elem->end_col_offset, p->arena);

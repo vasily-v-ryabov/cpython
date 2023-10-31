@@ -620,7 +620,6 @@ static const char * const JoinedStr_fields[]={
 };
 static const char * const Constant_fields[]={
     "value",
-    "kind",
 };
 static const char * const Attribute_fields[]={
     "value",
@@ -3147,7 +3146,7 @@ _PyAST_JoinedStr(asdl_expr_seq * values, int lineno, int col_offset, int
 }
 
 expr_ty
-_PyAST_Constant(constant value, string kind, int lineno, int col_offset, int
+_PyAST_Constant(constant value, int lineno, int col_offset, int
                 end_lineno, int end_col_offset, PyArena *arena)
 {
     expr_ty p;
@@ -3161,7 +3160,6 @@ _PyAST_Constant(constant value, string kind, int lineno, int col_offset, int
         return NULL;
     p->kind = Constant_kind;
     p->v.Constant.value = value;
-    p->v.Constant.kind = kind;
     p->lineno = lineno;
     p->col_offset = col_offset;
     p->end_lineno = end_lineno;
@@ -9972,7 +9970,7 @@ obj2ast_expr(struct ast_state *state, PyObject* obj, expr_ty* out, PyArena*
             if (res != 0) goto failed;
             Py_CLEAR(tmp);
         }
-        *out = _PyAST_Constant(value, kind, lineno, col_offset, end_lineno,
+        *out = _PyAST_Constant(value, lineno, col_offset, end_lineno,
                                end_col_offset, arena);
         if (*out == NULL) goto failed;
         return 0;
